@@ -32,21 +32,19 @@
   }
 
   function renderGallery(srcs, chapterNum) {
-    var solo = srcs.length === 1;
-    var cls = "gallery " + (solo ? "gallery--solo" : "gallery--duo");
-    var out = '<div class="' + cls + '">';
-    srcs.forEach(function (src, i) {
-      out +=
-        '<img src="' +
-        esc(src) +
-        '" alt="Иллюстрация к главе ' +
-        chapterNum +
-        (srcs.length > 1 ? ", " + (i + 1) + " из " + srcs.length : "") +
-        '"' +
-        sizeAttrs(src) +
-        ' loading="lazy" decoding="async" data-zoom="1">';
-    });
-    return out + "</div>";
+    return srcs.map(function (src) { return renderFigure(src, chapterNum, ""); }).join("");
+  }
+
+  function renderFigure(src, chapterNum, extraClass) {
+    var d = dims[src] || [0, 0];
+    var cls = "figure" + (d[0] && d[0] < 320 ? " figure--sm" : "");
+    if (extraClass) cls += " " + extraClass;
+    return (
+      '<figure class="' + cls + '">' +
+      '<img src="' + esc(src) + '" alt="Иллюстрация к главе ' + chapterNum + '"' +
+      sizeAttrs(src) + ' loading="lazy" decoding="async" data-zoom="1">' +
+      "</figure>"
+    );
   }
 
   function renderBlocks(blocks, chapterNum, leadState) {
@@ -95,10 +93,10 @@
         var lead = !!(leadState && leadState.pending);
         if (lead) leadState.pending = false;
         out += '<p class="p' + (lead ? " lead" : "") + '">' + esc(b.text) + "</p>";
+      } else if (b.type === "img" && b.src) {
+        out += renderFigure(b.src, chapterNum, "");
       } else if (b.type === "gallery" && b.srcs && b.srcs.length) {
         out += renderGallery(b.srcs, chapterNum);
-      } else if (b.type === "img" && b.src) {
-        out += renderGallery([b.src], chapterNum);
       }
     });
 
@@ -113,8 +111,13 @@
     var prev = data.chapters[idx - 1];
     var next = data.chapters[idx + 1];
 
+    var leadHtml = (ch.lead || []).map(function (src) {
+      return renderFigure(src, ch.num, "figure--lead");
+    }).join("");
+
     htmlOut +=
       '<article class="chapter" id="ch-' + ch.num + '" data-chapter="' + ch.num + '">' +
+      leadHtml +
       '<header class="chapter__head">' +
       '<p class="chapter__label">' + chapterLabel(ch.num) + "</p>" +
       '<h2 class="chapter__title">' + esc(ch.title) + "</h2>" +
@@ -122,11 +125,14 @@
 
     var leadState = { pending: true };
     ch.sections.forEach(function (sec, si) {
-      if (!sec.blocks || !sec.blocks.length) return;
+      if ((!sec.blocks || !sec.blocks.length) && !(sec.lead && sec.lead.length)) return;
       var hasTitle = sec.title && sec.title.trim();
       htmlOut += '<section class="sec">';
+      (sec.lead || []).forEach(function (src) {
+        htmlOut += renderFigure(src, ch.num, "");
+      });
       if (hasTitle) htmlOut += '<h3 class="sec__title">' + esc(sec.title) + "</h3>";
-      htmlOut += renderBlocks(sec.blocks, ch.num, leadState);
+      htmlOut += renderBlocks(sec.blocks || [], ch.num, leadState);
       htmlOut += "</section>";
     });
 
@@ -153,6 +159,9 @@
   data.extras.forEach(function (ex, i) {
     htmlOut +=
       '<article class="chapter chapter--extra" id="extra-' + i + '">' +
+      (ex.lead || []).map(function (src) {
+        return renderFigure(src, TOTAL, "figure--lead");
+      }).join("") +
       '<header class="chapter__head">' +
       '<p class="chapter__label">' + (i === 0 ? "После книги" : "Финал") + "</p>" +
       '<h2 class="chapter__title">' + esc(ex.title) + "</h2>" +
