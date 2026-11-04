@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="ru" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Дуся и Белый Мякиш — книга-сказка</title>
+<meta name="description" content="«Дуся и Белый Мякиш. Большое путешествие маленьких друзей» — иллюстрированная сказка Светы Грызловой. Читайте онлайн с удобным фоном: белым или чёрным.">
+<meta name="author" content="Света Грызлова">
+<meta name="theme-color" content="#fbf8f3">
+<meta property="og:type" content="book">
+<meta property="og:title" content="Дуся и Белый Мякиш">
+<meta property="og:description" content="Большое путешествие маленьких друзей. Иллюстрированная сказка в 7 главах.">
+<meta property="og:image" content="images/img-01.webp">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%234a6fa5'/%3E%3Cellipse cx='27' cy='38' rx='14' ry='11' fill='%23fff'/%3E%3Cellipse cx='38' cy='27' rx='11' ry='9' fill='%23fff'/%3E%3Ccircle cx='24' cy='36' r='2' fill='%234a6fa5'/%3E%3Cpath d='M13 40c4 3 8 3 12 1' stroke='%234a6fa5' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/style.css">
+<script>
+  /* фон и размер текста применяются до первой отрисовки, чтобы не было вспышки */
+  (function () {
+    try {
+      var t = localStorage.getItem("dusya-theme");
+      if (t !== "light" && t !== "dark") {
+        t = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches
+          ? "dark" : "light";
+      }
+      document.documentElement.setAttribute("data-theme", t);
+      var f = parseInt(localStorage.getItem("dusya-fs"), 10);
+      document.documentElement.setAttribute("data-fs", f >= 1 && f <= 4 ? f : 2);
+    } catch (e) {
+      document.documentElement.setAttribute("data-theme", "light");
+      document.documentElement.setAttribute("data-fs", "2");
+    }
+  })();
+</script>
+</head>
+<body>
+<a class="skip-link" href="#book">Перейти к тексту книги</a>
+
+<div class="progress" aria-hidden="true"><div class="progress__bar" id="progressBar"></div></div>
+
+<header class="topbar" id="topbar">
+  <div class="topbar__inner">
+    <a class="brand" href="#top">
+      <span class="brand__mark" aria-hidden="true"></span>
+      <span class="brand__text">Дуся и Белый Мякиш</span>
+    </a>
+    <div class="topbar__tools">
+      <button class="tool" id="tocBtn" type="button" aria-expanded="false" aria-controls="toc">
+        <span class="tool__icon" aria-hidden="true">☰</span><span class="tool__label">Содержание</span>
+      </button>
+      <div class="seg" role="group" aria-label="Фон для чтения" id="themeSeg">
+        <button class="seg__btn" type="button" data-set-theme="light" aria-pressed="true">
+          <span class="seg__dot seg__dot--light" aria-hidden="true"></span>Белый
+        </button>
+        <button class="seg__btn" type="button" data-set-theme="dark" aria-pressed="false">
+          <span class="seg__dot seg__dot--dark" aria-hidden="true"></span>Чёрный
+        </button>
+      </div>
+      <div class="fs" role="group" aria-label="Размер текста">
+        <button class="fs__btn" type="button" id="fsDown" aria-label="Уменьшить текст">А−</button>
+        <button class="fs__btn" type="button" id="fsUp" aria-label="Увеличить текст">А+</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero" aria-labelledby="bookTitle">
+    <div class="hero__glow" aria-hidden="true"></div>
+    <div class="hero__inner">
+      <figure class="hero__cover">
+        <img id="coverImg" src="images/img-01.webp" alt="Обложка книги «Дуся и Белый Мякиш»" width="1024" height="1536">
+      </figure>
+      <div class="hero__text">
+        <p class="eyebrow">Сказка в семи главах</p>
+        <h1 id="bookTitle">Дуся и&nbsp;Белый Мякиш</h1>
+        <p class="hero__sub">Большое путешествие маленьких друзей</p>
+        <p class="hero__by">Автор — Света Грызлова<br>Редактор — Виктор Павлович</p>
+        <div class="hero__actions">
+          <a class="btn" href="#ch-1">Начать читать</a>
+          <button class="btn btn--ghost" type="button" id="heroTheme">Сменить фон</button>
+        </div>
+        <p class="hero__hint">Совет: фон можно переключить на белый или чёрный в любой момент — кнопкой вверху.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="book" id="book"></div>
+
+  <footer class="footer">
+    <div class="footer__inner">
+      <p class="footer__title">Дуся и Белый Мякиш</p>
+      <p class="footer__note">Текст — Света Грызлова · редакция V09 · 5 ноября 2026</p>
+      <p class="footer__note">Иллюстрации из книги. Сделано для чтения с удовольствием.</p>
+      <a class="footer__top" href="#top">Наверх ↑</a>
+    </div>
+  </footer>
+</main>
+
+<aside class="drawer" id="toc" aria-hidden="true" aria-labelledby="tocTitle">
+  <div class="drawer__head">
+    <p class="drawer__title" id="tocTitle">Содержание</p>
+    <button class="drawer__close" type="button" id="tocClose" aria-label="Закрыть содержание">✕</button>
+  </div>
+  <nav class="drawer__nav" id="tocNav"></nav>
+  <div class="drawer__theme">
+    <p class="drawer__sub">Фон для чтения</p>
+    <div class="seg seg--wide" role="group" aria-label="Фон для чтения">
+      <button class="seg__btn" type="button" data-set-theme="light" aria-pressed="true">
+        <span class="seg__dot seg__dot--light" aria-hidden="true"></span>Белый
+      </button>
+      <button class="seg__btn" type="button" data-set-theme="dark" aria-pressed="false">
+        <span class="seg__dot seg__dot--dark" aria-hidden="true"></span>Чёрный
+      </button>
+    </div>
+  </div>
+</aside>
+<div class="scrim" id="scrim" hidden></div>
+
+<div class="lightbox" id="lightbox" hidden>
+  <button class="lightbox__close" type="button" id="lightboxClose" aria-label="Закрыть иллюстрацию">✕</button>
+  <img class="lightbox__img" id="lightboxImg" alt="">
+</div>
+
+<script src="assets/book-data.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>
