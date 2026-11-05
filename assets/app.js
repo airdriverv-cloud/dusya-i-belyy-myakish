@@ -31,14 +31,8 @@
     return d ? ' width="' + d[0] + '" height="' + d[1] + '"' : "";
   }
 
-  function renderGallery(srcs, chapterNum) {
-    return srcs.map(function (src) { return renderFigure(src, chapterNum, ""); }).join("");
-  }
-
   function renderFigure(src, chapterNum, extraClass) {
-    var d = dims[src] || [0, 0];
-    var cls = "figure" + (d[0] && d[0] < 320 ? " figure--sm" : "");
-    if (extraClass) cls += " " + extraClass;
+    var cls = "figure" + (extraClass ? " " + extraClass : "");
     return (
       '<figure class="' + cls + '">' +
       '<img src="' + esc(src) + '" alt="Иллюстрация к главе ' + chapterNum + '"' +
@@ -47,7 +41,9 @@
     );
   }
 
-  function renderBlocks(blocks, chapterNum, leadState) {
+  /* Текстовые блоки одной ячейки: заголовок главы, подзаголовок,
+     абзацы, реплики, вопросы. */
+  function renderBlocks(blocks, chapterNum, ctx) {
     var out = "";
     var inQuiz = false;
     var inDialog = false;
@@ -87,16 +83,20 @@
       }
       closeDialog();
 
-      if (b.type === "h3") {
+      if (b.type === "h1") {
+        out +=
+          '<header class="chapter__head">' +
+          '<p class="chapter__label">' + esc(ctx.label) + "</p>" +
+          '<h2 class="chapter__title">' + esc(b.text) + "</h2>" +
+          "</header>";
+      } else if (b.type === "h2" || b.type === "h3") {
         out += '<h3 class="sec__title">' + esc(b.text) + "</h3>";
       } else if (b.type === "p") {
-        var lead = !!(leadState && leadState.pending);
-        if (lead) leadState.pending = false;
+        var lead = !!(ctx.leadState && ctx.leadState.pending);
+        if (lead) ctx.leadState.pending = false;
         out += '<p class="p' + (lead ? " lead" : "") + '">' + esc(b.text) + "</p>";
       } else if (b.type === "img" && b.src) {
         out += renderFigure(b.src, chapterNum, "");
-      } else if (b.type === "gallery" && b.srcs && b.srcs.length) {
-        out += renderGallery(b.srcs, chapterNum);
       }
     });
 
@@ -105,36 +105,41 @@
     return out;
   }
 
+  /* Разворот книги: картинка и её текст стоят напротив друг друга,
+     сторона картинки чередуется — как на страницах книги. */
+  function renderRow(row, chapterNum, ctx) {
+    var textHtml = renderBlocks(row.blocks || [], chapterNum, ctx);
+    var textCell = '<div class="spread__text">' + textHtml + "</div>";
+
+    if (!row.img) {
+      return '<div class="spread spread--wide">' + textCell + "</div>";
+    }
+
+    var figCell =
+      '<div class="spread__figure">' + renderFigure(row.img, chapterNum, "") + "</div>";
+    var inner = row.side === "right" ? textCell + figCell : figCell + textCell;
+
+    return (
+      '<div class="spread spread--img-' + (row.side || "left") + '">' + inner + "</div>"
+    );
+  }
+
   var htmlOut = "";
 
   data.chapters.forEach(function (ch, idx) {
     var prev = data.chapters[idx - 1];
     var next = data.chapters[idx + 1];
-
-    var leadHtml = (ch.lead || []).map(function (src) {
-      return renderFigure(src, ch.num, "figure--lead");
-    }).join("");
+    var ctx = { leadState: { pending: true }, label: chapterLabel(ch.num) };
 
     htmlOut +=
       '<article class="chapter" id="ch-' + ch.num + '" data-chapter="' + ch.num + '">' +
-      leadHtml +
-      '<header class="chapter__head">' +
-      '<p class="chapter__label">' + chapterLabel(ch.num) + "</p>" +
-      '<h2 class="chapter__title">' + esc(ch.title) + "</h2>" +
-      "</header>";
+      '<div class="rows">';
 
-    var leadState = { pending: true };
-    ch.sections.forEach(function (sec, si) {
-      if ((!sec.blocks || !sec.blocks.length) && !(sec.lead && sec.lead.length)) return;
-      var hasTitle = sec.title && sec.title.trim();
-      htmlOut += '<section class="sec">';
-      (sec.lead || []).forEach(function (src) {
-        htmlOut += renderFigure(src, ch.num, "");
-      });
-      if (hasTitle) htmlOut += '<h3 class="sec__title">' + esc(sec.title) + "</h3>";
-      htmlOut += renderBlocks(sec.blocks || [], ch.num, leadState);
-      htmlOut += "</section>";
+    ch.rows.forEach(function (row) {
+      htmlOut += renderRow(row, ch.num, ctx);
     });
+
+    htmlOut += "</div>";
 
     htmlOut += '<nav class="chapter__nav" aria-label="Переход между главами">';
     if (prev) {
@@ -157,17 +162,19 @@
   });
 
   data.extras.forEach(function (ex, i) {
+    var ctx = {
+      leadState: { pending: false },
+      label: i === 0 ? "После книги" : "Финал",
+    };
     htmlOut +=
       '<article class="chapter chapter--extra" id="extra-' + i + '">' +
-      (ex.lead || []).map(function (src) {
-        return renderFigure(src, TOTAL, "figure--lead");
-      }).join("") +
-      '<header class="chapter__head">' +
-      '<p class="chapter__label">' + (i === 0 ? "После книги" : "Финал") + "</p>" +
-      '<h2 class="chapter__title">' + esc(ex.title) + "</h2>" +
-      "</header><section class=\"sec\">" +
-      renderBlocks(ex.blocks, TOTAL) +
-      "</section></article>";
+      '<div class="rows">';
+
+    (ex.rows || []).forEach(function (row) {
+      htmlOut += renderRow(row, TOTAL, ctx);
+    });
+
+    htmlOut += "</div></article>";
   });
 
   book.innerHTML = htmlOut;

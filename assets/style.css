@@ -400,23 +400,53 @@ button { font: inherit; color: inherit; }
 }
 
 /* ============ Книга ============ */
+/* Разворот: картинка и её текст стоят напротив друг друга, сторона
+   картинки чередуется от разворота к развороту, как в книге. */
 .book {
-  width: min(var(--maxw), 100% - 2.5rem);
+  width: min(1080px, 100% - 3rem);
   margin: 0 auto;
   padding-bottom: 1rem;
 }
 
 .chapter {
-  padding: clamp(3rem, 7vw, 5.5rem) 0 clamp(2rem, 4vw, 3rem);
+  padding: clamp(2.4rem, 5vw, 4rem) 0 clamp(1.6rem, 3.5vw, 2.6rem);
   border-top: 1px solid var(--line);
 }
 .chapter:first-child {
   border-top: 0;
-  padding-top: clamp(1.2rem, 3vw, 2.2rem);
+  padding-top: clamp(1rem, 2.5vw, 2rem);
+}
+
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(2.2rem, 5vw, 3.8rem);
+}
+
+.spread {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: clamp(1.5rem, 4vw, 3.5rem);
+  align-items: center;
+}
+.spread--wide { grid-template-columns: 1fr; }
+.spread--wide .spread__text {
+  max-width: var(--maxw);
+  margin-inline: auto;
+  width: 100%;
+}
+
+.spread__text {
+  min-width: 0;
+  max-width: 34rem;
+}
+.spread__figure {
+  min-width: 0;
+  margin: 0;
 }
 
 .chapter__head {
-  margin-bottom: clamp(1.8rem, 4vw, 2.8rem);
+  margin-bottom: clamp(1.4rem, 3vw, 2.2rem);
 }
 .chapter__label {
   display: inline-flex;
@@ -446,18 +476,16 @@ button { font: inherit; color: inherit; }
 }
 .chapter__title {
   margin: 0;
-  font-size: clamp(1.85rem, 4.4vw, 2.75rem);
+  font-size: clamp(1.7rem, 3.4vw, 2.5rem);
   line-height: 1.12;
   letter-spacing: -.015em;
   font-weight: 600;
   text-wrap: balance;
 }
 
-.sec + .sec { margin-top: 2.4rem; }
-
 .sec__title {
-  margin: 2.6rem 0 1.2rem;
-  font-size: clamp(1.12rem, 2.4vw, 1.35rem);
+  margin: 2.2rem 0 1.1rem;
+  font-size: clamp(1.1rem, 1.7vw, 1.28rem);
   font-weight: 600;
   line-height: 1.35;
   color: var(--text);
@@ -472,7 +500,8 @@ button { font: inherit; color: inherit; }
   border-radius: 2px;
   opacity: .55;
 }
-.sec:first-child .sec__title { margin-top: 0; }
+.chapter__head + .sec__title,
+.sec__title:first-child { margin-top: 0; }
 
 .book p { margin: 0 0 1.05em; }
 .book p:last-child { margin-bottom: 0; }
@@ -501,22 +530,17 @@ button { font: inherit; color: inherit; }
 }
 
 /* ---------- Иллюстрации ----------
-   В книге каждая картинка — квадратная вклейка примерно в половину
-   текстовой колонки. На сайте так же: картинка ставится между
-   абзацами, по центру, шириной около половины колонки. */
+   В книге картинка стоит в своей половине разворота, напротив
+   текста. На сайте так же: своя колонка, квадратная вклейка. */
 .figure {
-  margin: clamp(1.7rem, 4vw, 2.5rem) auto;
-  max-width: 500px;
+  margin: 0;
 }
-.figure--lead {
-  margin-top: clamp(.4rem, 1.5vw, 1rem);
-  margin-bottom: clamp(1.4rem, 3vw, 2rem);
-}
-.figure--sm { max-width: 380px; }
 .figure img {
   display: block;
   width: 100%;
+  max-width: 520px;
   height: auto;
+  margin-inline: auto;
   border-radius: var(--radius);
   border: 1px solid var(--line);
   background: var(--surface);
@@ -775,6 +799,19 @@ button { font: inherit; color: inherit; }
 .lightbox__close:hover { background: rgba(255, 255, 255, .16); }
 
 /* ============ Адаптив ============ */
+/* На узком экране разворот складывается в столбик: картинка встаёт
+   рядом со своим текстом — сверху или снизу, как она стоит в книге. */
+@media (max-width: 960px) {
+  .book { width: min(720px, 100% - 2.5rem); }
+  .spread {
+    grid-template-columns: 1fr;
+    row-gap: clamp(1rem, 3vw, 1.5rem);
+  }
+  .spread__text { max-width: none; }
+  .spread__figure .figure img { max-width: 100%; }
+  .figure img { margin-inline: 0; }
+}
+
 @media (max-width: 900px) {
   .hero__inner {
     grid-template-columns: 1fr;
@@ -801,7 +838,6 @@ button { font: inherit; color: inherit; }
   .fs { display: none; }
   .drawer__theme .fs { display: none; }
   .hero { padding-top: calc(var(--topbar-h) + 1.6rem); }
-  .gallery--duo { grid-template-columns: 1fr 1fr; gap: .6rem; }
   .chapter__nav { flex-direction: column; }
   .chapter__nav a { max-width: 100%; }
   .chapter__nav .nav-next { align-items: flex-start; text-align: left; }
