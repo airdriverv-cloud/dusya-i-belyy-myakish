@@ -806,17 +806,30 @@ button { font: inherit; color: inherit; }
   .spread--img-right { grid-template-columns: 56fr 44fr; }
 }
 
-/* Уже 820 px разворот складывается в столбик: картинка встаёт рядом
-   со своим текстом — сверху или снизу, как она стоит в книге. */
+/* Уже 820 px разворот складывается в столбик, но картинка остаётся
+   «на своей стороне»: слева или справа от текста, как в книге,
+   поэтому шахматный порядок читается и на телефоне. */
 @media (max-width: 820px) {
   .book { width: min(720px, 100% - 2.5rem); }
   .spread {
     grid-template-columns: 1fr;
-    row-gap: clamp(1rem, 3vw, 1.5rem);
+    row-gap: clamp(.9rem, 3vw, 1.3rem);
   }
   .spread__text { max-width: none; }
+  .spread__figure { width: 100%; order: -1; }
   .spread__figure .figure img { max-width: 100%; }
   .figure img { margin-inline: 0; }
+
+  .spread--img-left .spread__figure { padding-right: 10%; }
+  .spread--img-right .spread__figure { padding-left: 10%; }
+
+  /* каждый разворот — отдельный блок, между ними заметный отступ */
+  .rows { gap: clamp(2.4rem, 7vw, 3.2rem); }
+}
+
+@media (max-width: 380px) {
+  .spread--img-left .spread__figure { padding-right: 7%; }
+  .spread--img-right .spread__figure { padding-left: 7%; }
 }
 
 @media (max-width: 900px) {
